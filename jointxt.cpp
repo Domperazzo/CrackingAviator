@@ -12,7 +12,7 @@
 int main(int argc, char **argv){
 
     std::ifstream dati;
-    dati.open("dati6.txt", std::ios::in);
+    dati.open("dati7.txt", std::ios::in);
     std::vector<double> v_dati;
     int line = 0;
     while (true)
