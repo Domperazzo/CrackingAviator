@@ -3,9 +3,10 @@
 */
 
 // =================================================================== //
-//                                                                     //
 // Author: Federico Venturoli                                          //
+//                                                                     //
 // Last edited: 10.08.2018                                             //
+//                                                                     //
 // Nella sezione delle simulazioni, il programma estrae M valori       //
 // distribuiti secondo una poissoniana di cui si sono determinati      //
 // i parametri precedentemente. Se la somma dei valori estratti supera //
@@ -38,9 +39,9 @@
 #include <chrono>
 #include <ctime>
 
-
 #include "simulazione.h"
-    using namespace std;
+
+using namespace std;
 
 int main(int argc, char **argv){
 
@@ -68,14 +69,12 @@ int main(int argc, char **argv){
     hist->Fit("fit_func", "Q");
     fit_func.SetParName(0, "Lambda");
 
-    std::cout << "Istogramma fittato" << "\n";
-
     double lambda = fit_func.GetParameter(0);
 
     
 
-    int N = 10000; // Numero di simulazioni da eseguire
-    int M = 100; // Numero di valori estratti in ogni simulazione
+    int N = 1000; // Numero di simulazioni da eseguire
+    int M = 50; // Numero di valori estratti in ogni simulazione
 
     
     int soglia_max = 10;
@@ -88,15 +87,16 @@ int main(int argc, char **argv){
     vector<double> v_saldi;
 
     TFile *file = new TFile("output.root", "RECREATE");
+    
     TGraph2D *g = new TGraph2D();
-
+    
     simulazione sim;
 
     sim.set_number_of_simulations(M);
     sim.set_lambda(lambda);
     int n = 0;
+   
     do{
-        //std::cout << "Entrato nel while" << "\n";
         std::vector<double> v_sim;
         
         for (int i = 0; i < soglia_max; i++){
@@ -113,9 +113,7 @@ int main(int argc, char **argv){
            v_sim.clear();
         }
         n++;
-        if (n % 200 == 0){
-            std::cout<< "Simulazione numero:\t" << n << "\n";
-        }
+        std::cout<< "Simulazione numero:\t" << n << "\n";
         
     } while (n < N);
 
@@ -139,4 +137,4 @@ int main(int argc, char **argv){
     c1.Print("g1.pdf", "pdf");
 
     return 0;
-    }
+}

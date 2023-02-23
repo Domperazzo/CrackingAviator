@@ -60,7 +60,7 @@ int main(int argc, char **argv){
                 max_bet = bet;
                 max_treshold = treshold;
                 n_max++;
-                std::cout << "Maximo relativo in (" << max_bet << "," << max_treshold << "): " << max_saldo << "\n";
+                std::cout << "Massimo relativo in (" << max_bet << "," << max_treshold << "): " << max_saldo << "\n";
             }
         }
     }
