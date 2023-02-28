@@ -1,6 +1,7 @@
 #include "simulazione.h"
 #include <random>
 #include "TF1.h"
+#include "TRandom3.h"
 
 
 simulazione::simulazione():
@@ -58,24 +59,15 @@ void simulazione::set_moltiplicator(std::vector<double> val){
     v_moltiplicator = val;
 }
 
-double random(TF1 &func)
-{
-    std::mt19937 generator(std::random_device{}());
-
-    double x_min = func.GetXmin();
-    double x_max = func.GetXmax();
-
-    while (true)
+double random(TF1 &func){
+    TRandom3 rndGen;
+    double x, y;
+    do
     {
-        double x = std::uniform_real_distribution<double>(x_min, x_max)(generator);
-        double y = func.Eval(x);
-        double y_max = func.GetMaximum();
-        double y_test = std::uniform_real_distribution<double>(0.0, y_max)(generator);
-        if (y_test < y)
-        {
-            return x;
-        }
-    }
+        x = rndGen.Uniform(func.GetXmin(), func.GetXmax());
+        y = rndGen.Uniform(func.GetMinimum(), func.GetMaximum());
+    } while (y > func.Eval(x));
+    return x;
 }
 
 std::vector<double> simulazione::generator(TF1 &dist_func){

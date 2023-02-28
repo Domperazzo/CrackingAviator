@@ -12,7 +12,7 @@
 // i parametri precedentemente. Se la somma dei valori estratti supera //
 // la soglia, viene aggiornata la variabile "saldo", In caso contrario,//
 // la variabile "saldo" viene decrementata di "bet".                   //
-// Alla fine delle N simulazioni, l programma cerca la combinazione    //
+// Alla fine delle N simulazioni, il programma cerca la combinazione    //
 // di "saldo" e "bet" che massimizza il saldo eseguendo un ciclo while //
 // e for che confrontano il saldo ottenuto in ogni simulazione.        //
 //                                                                     //
@@ -29,6 +29,7 @@
 #include <iostream>
 #include <fstream>
 #include "TH1F.h"
+#include "TH3F.h"
 #include "TF1.h"
 #include "TRandom3.h"
 #include "TStyle.h"
@@ -58,7 +59,7 @@ int main(int argc, char **argv){
     }
     input_file.close();
 
-    TH1F *hist = new TH1F("hist", "Titolo istogramma", 800, 0, 40);
+    TH1F *hist = new TH1F("hist", "Distribuzione moltiplicatore", 800, 1, 40);
 
     for (auto val : data){
         hist->Fill(val);
@@ -74,7 +75,7 @@ int main(int argc, char **argv){
     
 
     int N = 1000; // Numero di simulazioni da eseguire
-    int M = 50; // Numero di valori estratti in ogni simulazione
+    int M = 100; // Numero di valori estratti in ogni simulazione
 
     
     int soglia_max = 10;
@@ -86,45 +87,48 @@ int main(int argc, char **argv){
     vector<double> v_bet;
     vector<double> v_saldi;
 
-    TFile *file = new TFile("output.root", "RECREATE");
-    
+    //TFile *file = new TFile("output.root", "RECREATE");
+
     TGraph2D *g = new TGraph2D();
-    
+    TH3F *h2 = new TH3F("hist3D", "hist3D", 10, -1000, 1000, 10, -1000, 1000, 10, -1000, 1000);
     simulazione sim;
 
     sim.set_number_of_simulations(M);
-    sim.set_lambda(lambda);
     int n = 0;
    
-    do{
-        std::vector<double> v_sim;
-        
-        for (int i = 0; i < soglia_max; i++){
-           for (int j = 0; j < bet_max; j++){
-               v_sim = sim.generator(fit_func);
-               sim.set_moltiplicator(v_sim);
+    for (double i = 1; i < soglia_max; i=i+0.5){
+        for (double j = 1; j < bet_max; j=j+0.5){
+            do{ 
+               sim.set_moltiplicator(sim.generator(fit_func));
                sim.set_tresh(i);
                sim.set_saldo(saldo1);
                sim.set_bet(j);
                sim.do_simulation();
-               g->SetPoint(i+j, sim.get_soglia(), sim.get_bet(), sim.get_saldo());
-           }
-           sim.set_saldo(saldo1);
-           v_sim.clear();
+               h2->Fill(sim.get_soglia(), sim.get_bet(), sim.get_saldo());
+               g->SetPoint(i + j, sim.get_soglia(), sim.get_bet(), sim.get_saldo());
+                       std::cout<< "Simulazione: " << n << "\t"
+                                << "Soglia: " << i << "\t"
+                                << "Bet: " << j << "\n";
+               n++;
+            } while (n < N);
+            n=0;
         }
-        n++;
-        std::cout<< "Simulazione numero:\t" << n << "\n";
+        sim.set_saldo(saldo1);
+    }
+    
+    
         
-    } while (n < N);
 
     g->SetTitle("Andamento saldo in funzione di bet e soglia; soglia; bet; saldo");
 
     gStyle->SetPalette(1);
     TCanvas c1;
     g->SetMarkerStyle(20);
-    g->Draw("pcol");
-    g->Write("grafico2D");
-    file->Close();
+    g->Draw("surf1");
+    //TCanvas c2;
+    //h2->Draw("pcol");
+    //g->Write("grafico2D");
+    //file->Close();
 
     auto end = std::chrono::system_clock::now();
 
@@ -133,8 +137,8 @@ int main(int argc, char **argv){
 
     std::cout << "elapsed time: " << elapsed_seconds.count() << "s" << '\n';
 
+    //c1.Print("g1.pdf", "pdf");
     theApp.Run();
-    c1.Print("g1.pdf", "pdf");
 
     return 0;
 }
