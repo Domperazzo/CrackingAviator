@@ -81,15 +81,19 @@ std::vector<double> simulazione::generator(TF1 &dist_func){
 void simulazione::do_simulation(){
     for (int i = 0; i < N; i++){
         if (v_moltiplicator.at(i) > soglia){
-            saldo = saldo - bet;
+            v_saldi.push_back(saldo - bet);
         } else{
-            saldo = (saldo - bet) + bet * v_moltiplicator.at(i);
+            v_saldi.push_back((saldo - bet) + bet * v_moltiplicator.at(i));
         }
     }
 }
 
 double simulazione::get_saldo(){
     return saldo;
+}
+
+std::vector<double> simulazione::get_Vsaldo(){
+    return v_saldi;
 }
 
 double simulazione::get_soglia(){

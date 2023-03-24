@@ -24,11 +24,9 @@ public:
   double get_saldo();
   double get_soglia();
   double get_bet();
+  std::vector<double> get_Vsaldo();
 
-
-
-  private:
-  int N;
+      private : int N;
   double soglia;
   double bet;
   double saldo;
@@ -36,5 +34,6 @@ public:
   double par2;
   double par3;
   std::vector<double> v_moltiplicator;
+  std::vector<double> v_saldi;
   double lambda;
 };

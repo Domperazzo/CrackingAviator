@@ -5,14 +5,14 @@
 // =================================================================== //
 // Author: Federico Venturoli                                          //
 //                                                                     //
-// Last edited: 10.08.2018                                             //
+// Last edited: 24.03.2023                                             //
 //                                                                     //
 // Nella sezione delle simulazioni, il programma estrae M valori       //
 // distribuiti secondo una poissoniana di cui si sono determinati      //
 // i parametri precedentemente. Se la somma dei valori estratti supera //
 // la soglia, viene aggiornata la variabile "saldo", In caso contrario,//
 // la variabile "saldo" viene decrementata di "bet".                   //
-// Alla fine delle N simulazioni, il programma cerca la combinazione    //
+// Alla fine delle N simulazioni, il programma cerca la combinazione   //
 // di "saldo" e "bet" che massimizza il saldo eseguendo un ciclo while //
 // e for che confrontano il saldo ottenuto in ogni simulazione.        //
 //                                                                     //
@@ -94,38 +94,48 @@ int main(int argc, char **argv){
     simulazione sim;
 
     sim.set_number_of_simulations(M);
-    int n = 0;
+
+    /*
+        Per la simulazione devo fare che imposto il numero di mani per simulazione e il numero totale
+        di simulazioni. Fisso soglia e bet e imposto un saldo iniziale. Per ogni partita salvo il saldo
+        finale in un vettore che sta nel private della classe
+    */
    
-    for (double i = 1; i < soglia_max; i=i+0.5){
-        for (double j = 1; j < bet_max; j=j+0.5){
-            do{ 
-               sim.set_moltiplicator(sim.generator(fit_func));
-               sim.set_tresh(i);
-               sim.set_saldo(saldo1);
-               sim.set_bet(j);
-               sim.do_simulation();
-               h2->Fill(sim.get_soglia(), sim.get_bet(), sim.get_saldo());
-               g->SetPoint(i + j, sim.get_soglia(), sim.get_bet(), sim.get_saldo());
-                       std::cout<< "Simulazione: " << n << "\t"
-                                << "Soglia: " << i << "\t"
-                                << "Bet: " << j << "\n";
-               n++;
-            } while (n < N);
-            n=0;
-        }
-        sim.set_saldo(saldo1);
+
+    double const_tresh = 1.50;
+    double const_bet = 1.00;
+    double const_saldo = 100.0;
+    int n_sim = 1000;
+
+    sim.set_moltiplicator(sim.generator(fit_func));
+    sim.set_tresh(const_tresh);
+    sim.set_saldo(const_saldo);
+    sim.set_bet(const_bet);
+    sim.do_simulation();
+    std::vector<double> v_saldo = sim.get_Vsaldo();
+    /*
+    h2->Fill(sim.get_soglia(), sim.get_bet(), sim.get_saldo());
+    g->SetPoint(i + j, sim.get_soglia(), sim.get_bet(), sim.get_saldo());
+            std::cout<< "Simulazione: " << n << "\t"
+                     << "Soglia: " << i << "\t"
+                     << "Bet: " << j << "\n";
+    }
+    */
+
+    TH1F *hist2 = new TH1F("hist2", "Saldo", 800, 1, 40);
+    for (int i = 0; i < v_saldo.size(); i++){
+        hist2->Fill(v_saldo.at(i));
     }
     
-    
-        
 
-    g->SetTitle("Andamento saldo in funzione di bet e soglia; soglia; bet; saldo");
+    //g->SetTitle("Andamento saldo in funzione di bet e soglia; soglia; bet; saldo");
 
     gStyle->SetPalette(1);
     TCanvas c1;
-    g->SetMarkerStyle(20);
-    g->Draw("surf1");
+    //g->SetMarkerStyle(20);
+    //g->Draw("surf1");
     //TCanvas c2;
+    hist2->Draw();
     //h2->Draw("pcol");
     //g->Write("grafico2D");
     //file->Close();
